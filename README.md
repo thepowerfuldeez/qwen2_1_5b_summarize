@@ -1,6 +1,72 @@
 
 This repo is an experimental preference fine-tuning of Qwen2-1.5B model for summarization task
 
+The goal is to re-implement Apple work on training specific LoRA's on top of small LM to perform specific tasks, for example summarization.
+
+
+### Method
+
+Dataset generated using samples from [RedPajamaV2 dataset](https://huggingface.co/datasets/togethercomputer/RedPajama-Data-1T), specifically Arxiv, Wikipedia, StackExchange documents.
+I have downloaded 1% of data and filtered samples that are longer than 900 and shorter than 1800 tokens.
+
+For test set, I saved documents between 16000 and 100000 characters.
+
+Then, I have used [Qwen2-72B-Instruct](https://huggingface.co/Qwen/Qwen2-72B-Instruct) hosted on [Together.ai](https://www.together.ai/) to generate synthetic preference dataset suited for DPO training. Total dataset costed me about $50.
+This model accepts maximum 32k tokens, so only such outputs where inputs are shorter than 32k tokens are saved. 
+
+- Task for LLM is to summarize following extract of text, then provide 2 different summaries, second one being a bit shorter, provide explanations, provide rating of summaries, and return Best Summary. 
+- I have parsed output from LLM with regexps and filtered responses that have summaries that are too simillar (levenshtein >0.75) and which have low difference of scores <= 1.
+- Some of the criteria for my prompt are taken from [GEval suite](https://github.com/microsoft/promptflow/tree/main/examples/flows/evaluation/eval-summarization)
+
+I have generated both train/test datasets using such approach, where test set containts documents that are significantly longer.
+
+I have published datasets on HF hub: Train, Test
+
+Prompt that I used
+
+Due to gpu constraints, I have fine-tuned at 2048 max sequence len. However, Qwen2 uses `rope_base: 1000000` which is suitable for RoPE extension, so I tested resulting models on context of 8-16K tokens.
+
+I have used DPO algorithm with QLoRa-4bit trained for 2 epochs with learning rate 5e-5 in axolotl
+
+Axolotl config
+
+
+### Metrics
+
+#### BERTScore
+|Model name          | Dataset size | Result     |
+| ------------------ | ------------ | ---------- |
+|Qwen2-1.5B-Instruct | -            | 0.07       |
+|Qwen2-1.5B-Summarize| 8000         | **0.14**   |
+|Qwen2-1.5B-Summarize| 20500        | In progress|
+
+
+I have used BERTScore from [official](https://github.com/Tiiiger/bert_score/tree/master) implementation with `microsoft/deberta-xlarge-mnli` model.
+Then I sampled 32 inputs from test set (longer sentences to summarize) and generated summaries. I have reference summaries generated from stronger, Qwen2-72B-Instruct model, which I used as targets for metric.
+
+
+### Usage
+
+You can use latest model on [huggingface](https://huggingface.co/thepowefuldeez/Qwen2-1.5B-Summarize)
+```python
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-1.5B-Instruct")
+model = AutoModelForCausalLM.from_pretrained("thepowerfuldeez/Qwen2-1.5B-Summarize", 
+                                             bnb_4bit_compute_dtype=torch.bfloat16,
+                                             load_in_4bit=True, attn_implementation="flash_attention_2")
+
+text = <YOUR_TEXT>
+messages = [
+    {"role": "user", "content": text},
+]
+input_ids = tokenizer.apply_chat_template(messages, return_tensors='pt')
+new_tokens = model.generate(input_ids, max_new_tokens=1024)[0][len(input_ids[0]):]
+summary = tokenizer.decode(new_tokens, skip_special_tokens=True)
+```
+
+### Example:
 Summarize this paper: https://arxiv.org/abs/2402.12354
 
 Qwen2-1.5B-Instruct:
