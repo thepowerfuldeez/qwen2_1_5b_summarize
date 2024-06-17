@@ -20,7 +20,7 @@ This model accepts maximum 32k tokens, so only such outputs where inputs are sho
 
 I have generated both train/test datasets using such approach, where test set containts documents that are significantly longer.
 
-I have published datasets on HF hub: Train, Test
+I have published datasets on HF hub: [Train](https://huggingface.co/datasets/thepowefuldeez/Qwen-summarize-dataset-train), [Test](https://huggingface.co/datasets/thepowefuldeez/Qwen-summarize-dataset-test)
 
 Prompt that I used
 
