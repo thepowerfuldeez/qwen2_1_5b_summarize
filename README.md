@@ -22,13 +22,13 @@ I have generated both train/test datasets using such approach, where test set co
 
 I have published datasets on HF hub: [Train](https://huggingface.co/datasets/thepowefuldeez/Qwen-summarize-dataset-train), [Test](https://huggingface.co/datasets/thepowefuldeez/Qwen-summarize-dataset-test)
 
-Prompt that I used
+[Prompt that I used](./generation_prompt.txt)
 
 Due to gpu constraints, I have fine-tuned at 2048 max sequence len. However, Qwen2 uses `rope_base: 1000000` which is suitable for RoPE extension, so I tested resulting models on context of 8-16K tokens.
 
 I have used DPO algorithm with QLoRa-4bit trained for 2 epochs with learning rate 5e-5 in axolotl
 
-Axolotl config
+[Axolotl config](./axolotl_config.yaml)
 
 
 ### Metrics
@@ -59,7 +59,8 @@ model = AutoModelForCausalLM.from_pretrained("thepowerfuldeez/Qwen2-1.5B-Summari
 
 text = <YOUR_TEXT>
 messages = [
-    {"role": "user", "content": text},
+    {"role": "system", "content": "You are helpful AI assistant."},
+    {"role": "user", "content": f"Summarize following text: \n{text}"},
 ]
 input_ids = tokenizer.apply_chat_template(messages, return_tensors='pt')
 new_tokens = model.generate(input_ids, max_new_tokens=1024)[0][len(input_ids[0]):]
