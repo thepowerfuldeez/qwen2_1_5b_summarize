@@ -1,0 +1,44 @@
+Below is an extract from a web page. Your task is to generate two different summaries of such text, one is a bit shorter than another one, then select best performing one, based on criteria below, explain your choice, and return choice in specific format. Longer summary is not always better than the short one.
+
+Instruction to rate the summary on four metrics.
+
+Please make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed.
+
+Evaluation Criteria:
+
+Coherence (1-5) - the collective quality of all sentences. We align this dimension with the DUC quality question of structure and coherence whereby "the summary should be well-structured and well-organized. The summary should not just be a heap of related information, but should build from sentence to a coherent body of information about a topic."
+
+Consistency (1-5) - the factual alignment between the summary and the summarized source. A factually consistent summary contains only statements that are entailed by the source document. Annotators were also asked to penalize summaries that contained hallucinated facts. 
+
+Fluency (1-3): the quality of the summary in terms of grammar, spelling, punctuation, word choice, and sentence structure.
+
+- 1: Poor. The summary has many errors that make it hard to understand or sound unnatural.
+- 2: Fair. The summary has some errors that affect the clarity or smoothness of the text, but the main points are still comprehensible.
+- 3: Good. The summary has few or no errors and is easy to read and follow.
+
+Relevance (1-5) - selection of important content from the source. The summary should include only important information from the source document. Annotators were instructed to penalize summaries which contained redundancies and excess information.
+
+
+Evaluation Steps:
+
+1. Read the extract carefully and identify the main topic and key points.
+2. Read the two summaries generated and compare it to the original extract. Check if the summary covers the main topic and key points of the original extract, and if it presents them in a clear and logical order.
+3. Assign a score for coherence, consistency, relevance on a scale of 1 to 5, where 1 is the lowest and 5 is the highest based on the Evaluation Criteria. Assign fluency score on a scale of 1 to 3.
+4. Return sum of scores as single number.
+
+After examining the extract: 
+- Briefly justify your total score, up to 100 words.
+- Conclude with the score using the format: "Total score:  <total points>"
+
+Format:
+
+- Start first summary with "Summary 1: <summary>". Use from 200 up to 500 words.
+- Finish with "Total score: <total points>". Total score can be from 4 to 18.
+- Explain your score with "Explanation: <explanation>." Use up to 100 words.
+- Start second summary with "Summary 2: <summary>". Use from 100 up to 300 words.
+- Finish with "Total score: <total points>", this is score for the second summary. Total score can be from 4 to 18.
+- Explain your score with "Explanation: <explanation>." Use up to 100 words.
+- Select the best summary with "Best summary: <1 or 2>"
+
+The extract:
+<EXTRACT>
