@@ -28,21 +28,24 @@ Due to gpu constraints, I have fine-tuned at 2048 max sequence len. However, Qwe
 
 I have used DPO algorithm with QLoRa-4bit trained for 2 epochs with learning rate 5e-5 in axolotl
 
+UPD: I have used SFT instead of DPO (just taking 'chosen' as a target and model performs better)
+
 [Axolotl config](./axolotl_config.yaml)
 
 
 ### Metrics
 
 #### BERTScore
-|Model name          | Dataset size | Result     |
-| ------------------ | ------------ | ---------- |
-|Qwen2-1.5B-Instruct | -            | 0.07       |
-|Qwen2-1.5B-Summarize| 8000         | **0.14**   |
-|Qwen2-1.5B-Summarize| 20500        | In progress|
+|Model name          | Type         | Dataset size | Result     |
+| ------------------ | ------------ | ------------ | ---------- |
+|Qwen2-1.5B-Instruct | SFT          | -            | 0.261      |
+|Qwen2-1.5B-Summarize| DPO          | 20500        | 0.269      |
+|Qwen2-1.5B-Summarize| DPO          | 40000        | 0.268      |
+|Qwen2-1.5B-Summarize| SFT          | 40000        | 0.389      |
 
 
 I have used BERTScore from [official](https://github.com/Tiiiger/bert_score/tree/master) implementation with `microsoft/deberta-xlarge-mnli` model.
-Then I sampled 32 inputs from test set (longer sentences to summarize) and generated summaries. I have reference summaries generated from stronger, Qwen2-72B-Instruct model, which I used as targets for metric.
+Then I sampled all inputs from test set (longer sentences to summarize) and generated summaries. I have reference summaries generated from stronger, Qwen2-72B-Instruct model, which I used as targets for metric.
 
 
 ### Usage
@@ -62,7 +65,7 @@ messages = [
     {"role": "system", "content": "You are helpful AI assistant."},
     {"role": "user", "content": f"Summarize following text: \n{text}"},
 ]
-input_ids = tokenizer.apply_chat_template(messages, return_tensors='pt')
+input_ids = tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors='pt')
 new_tokens = model.generate(input_ids, max_new_tokens=1024)[0][len(input_ids[0]):]
 summary = tokenizer.decode(new_tokens, skip_special_tokens=True)
 ```
